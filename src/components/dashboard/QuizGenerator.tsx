@@ -7,7 +7,6 @@ interface QuizGeneratorProps {
   onGenerate: (selectedFileIds: string[], options: any) => Promise<string>;
   initialQuiz?: string;
   onQuizGenerated: (content: string) => void;
-  spaceId: string;
 }
 
 interface QuizOptions {
@@ -26,15 +25,7 @@ interface QuizQuestion {
   type: string;
 }
 
-interface Message {
-  id?: string;
-  space_id: string;
-  role: 'user' | 'ai' | 'system';
-  content: string;
-  timestamp: string;
-}
-
-export default function QuizGenerator({ resources, onGenerate, initialQuiz, onQuizGenerated, spaceId }: QuizGeneratorProps) {
+export default function QuizGenerator({ resources, onGenerate, initialQuiz, onQuizGenerated }: QuizGeneratorProps) {
   const [showModal, setShowModal] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
@@ -53,7 +44,6 @@ export default function QuizGenerator({ resources, onGenerate, initialQuiz, onQu
   });
   const [generationStep, setGenerationStep] = useState<'idle' | 'reading' | 'generating' | 'complete'>('idle');
   const [showAnswers, setShowAnswers] = useState<{ [key: number]: boolean }>({});
-  const [messages, setMessages] = useState<Message[]>([]);
 
   const filteredResources = resources.filter(resource =>
     resource.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -179,49 +169,6 @@ export default function QuizGenerator({ resources, onGenerate, initialQuiz, onQu
   };
 
   const questions = parseQuizContent(quizContent);
-
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim() || !quizContent) return;
-
-    const userMessage = {
-      space_id: spaceId,
-      role: 'user' as const,
-      content: message,
-      timestamp: new Date().toISOString()
-    };
-    setMessages(prev => [...prev, userMessage]);
-
-    try {
-      const response = await fetch('http://localhost:8000/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          context: quizContent
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to get response');
-
-      const data = await response.json();
-      const aiMessage = {
-        space_id: spaceId,
-        role: 'ai' as const,
-        content: data.response,
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage = {
-        space_id: spaceId,
-        role: 'ai' as const,
-        content: 'Sorry, I encountered an error processing your message.',
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    }
-  };
 
   return (
     <div className="h-full bg-[#0A0B14] text-white p-8">

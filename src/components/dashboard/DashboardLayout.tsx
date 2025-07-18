@@ -1,6 +1,5 @@
 import { BookOpen, FolderPlus, Home, Menu, User, X, Plus, Eye, MessageSquare, FileText, HelpCircle, Brain, BookCheck, MoreVertical } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import AIChat from './AIChat';
 import ResourceManager from './ResourceManager';
 import NotesGenerator from './NotesGenerator';
@@ -38,51 +37,23 @@ interface Message {
   timestamp: string;
 }
 
-function DebugView() {
-  const [logs, setLogs] = useState<string[]>([]);
-
-  useEffect(() => {
-    const originalConsole = console.log;
-    console.log = (...args) => {
-      setLogs(prev => [...prev, args.join(' ')]);
-      originalConsole(...args);
-    };
-
-    return () => {
-      console.log = originalConsole; // Restore original console
-    };
-  }, []);
-
-  return (
-    <div className="fixed bottom-0 right-0 bg-black text-white p-4 max-h-40 overflow-auto text-xs z-50">
-      {logs.map((log, i) => <div key={i}>{log}</div>)}
-    </div>
-  );
-}
-
 export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [showCreateSpace, setShowCreateSpace] = useState(false);
-  const [showFilesList, setShowFilesList] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
   const [folderName, setFolderName] = useState('');
-  const [showResources, setShowResources] = useState(true);
-  const [showChat, setShowChat] = useState(false);
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
   const [showFolderSidebar, setShowFolderSidebar] = useState(true);
   const [dragActive, setDragActive] = useState(false);
   const [pdfText, setPdfText] = useState('');
-  const [notes, setNotes] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState('');
-  const [showFileSelector, setShowFileSelector] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [hoveredFolder, setHoveredFolder] = useState<string | null>(null);
   const [hoveredSpace, setHoveredSpace] = useState<string | null>(null);
   const [editingFolder, setEditingFolder] = useState<string | null>(null);
@@ -115,7 +86,7 @@ export default function DashboardLayout() {
       author: "Alex Rodriguez, Business Student",
     },
     {
-      text: "The flashcard system uses spaced repetition which helped me retain information long-term. Ace my finals thanks to Study Buddy!",
+      text: "The flashcard system uses spaced repetition which helped me retain information long-term. Ace my finals thanks to Beeka AI!",
       author: "Jessica Patel, Law Student",
     },
     {
@@ -144,7 +115,7 @@ export default function DashboardLayout() {
     return () => clearInterval(interval);
   }, [testimonials.length]);
 
-  const generateSpaceName = (type: string, content: string): string => {
+  const generateSpaceName = (type: string): string => {
       const now = new Date();
       const day = String(now.getDate()).padStart(2, '0');
       const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -172,7 +143,7 @@ export default function DashboardLayout() {
       }
 
       try {
-        const response = await fetch("http://localhost:8000/folders", {
+        const response = await fetch("https://beeka-backend.onrender.com/folders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: folderName, user_id: user?.uid || 'default' }),
@@ -203,11 +174,8 @@ export default function DashboardLayout() {
   };
 
   const handleFolderClick = (folder: Folder) => {
-    setSelectedFiles([]);
-    setNotes('');
     setSelectedFolder(folder);
     setIsSidebarOpen(false);
-    setShowResources(true);
     setShowFolderSidebar(true);
     setSelectedSpace(null);
   };
@@ -215,13 +183,13 @@ export default function DashboardLayout() {
   const handleCreateSpace = async (type: 'chat' | 'notes' | 'quiz' | 'flashcards' | 'solve') => {
     if (selectedFolder) {
       try {
-        let spaceName = generateSpaceName(type, '');
+        let spaceName = generateSpaceName(type);
         const requestBody = {
           type,
           name: spaceName,
           folder_id: selectedFolder.id,
         };
-        const response = await fetch("http://localhost:8000/spaces", {
+        const response = await fetch("https://beeka-backend.onrender.com/spaces", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestBody),
@@ -281,7 +249,7 @@ export default function DashboardLayout() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/upload/${selectedFolder.id}`,
+        `https://beeka-backend.onrender.com/upload/${selectedFolder.id}`,
         {
           method: "POST",
           body: formData,
@@ -341,7 +309,7 @@ export default function DashboardLayout() {
 
   const handleSendMessage = async (message: string, context: string) => {
     try {
-      const response = await fetch("http://localhost:8000/ask", {
+      const response = await fetch("https://beeka-backend.onrender.com/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: message, context }),
@@ -367,7 +335,7 @@ export default function DashboardLayout() {
       try {
         const fileContents = await Promise.all(
           selectedFileIds.map(async (fileId) => {
-            const response = await fetch(`http://localhost:8000/file-content/${fileId}`);
+            const response = await fetch(`https://beeka-backend.onrender.com/file-content/${fileId}`);
             if (!response.ok) {
               throw new Error(`Failed to fetch content for file ID: ${fileId}`);
             }
@@ -378,7 +346,7 @@ export default function DashboardLayout() {
 
         const context = fileContents.join("\n\n---\n\n");
 
-        const response = await fetch("http://localhost:8000/generate-notes", {
+        const response = await fetch("https://beeka-backend.onrender.com/generate-notes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ context }),
@@ -401,7 +369,7 @@ export default function DashboardLayout() {
           const spaceName = firstLine.startsWith('#') ? firstLine.substring(1).trim() : firstLine;
           
           // Update the space in the database with new notes and name
-          const updateResponse = await fetch(`http://localhost:8000/spaces/${selectedSpace.id}`, {
+          const updateResponse = await fetch(`https://beeka-backend.onrender.com/spaces/${selectedSpace.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -430,8 +398,6 @@ export default function DashboardLayout() {
           }
         }
         
-        setNotes(data.notes);
-        setShowFileSelector(false);
         return data.notes;
       } catch (error) {
         console.error(`Error generating notes (attempt ${retryCount + 1}/${maxRetries}):`, error);
@@ -439,7 +405,6 @@ export default function DashboardLayout() {
         
         if (retryCount === maxRetries) {
           const errorMessage = "Failed to generate notes after multiple attempts. Please try again.";
-          setNotes(errorMessage);
           throw new Error(errorMessage);
         }
         
@@ -450,7 +415,7 @@ export default function DashboardLayout() {
 
   const handleGenerateQuiz = async (selectedFileIds: string[], options: any) => {
     try {
-      const response = await fetch("http://localhost:8000/generate-quiz", {
+      const response = await fetch("https://beeka-backend.onrender.com/generate-quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -491,7 +456,7 @@ export default function DashboardLayout() {
 
   const handleGenerateFlashcards = async (selectedFileIds: string[]) => {
     try {
-      const response = await fetch("http://localhost:8000/generate-flashcards", {
+      const response = await fetch("https://beeka-backend.onrender.com/generate-flashcards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -531,7 +496,7 @@ export default function DashboardLayout() {
 
   const handleRenameFolder = async (folderId: string, newName: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/folders/${folderId}`, {
+      const response = await fetch(`https://beeka-backend.onrender.com/folders/${folderId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newName }),
@@ -557,7 +522,7 @@ export default function DashboardLayout() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/folders/${folderId}`, {
+      const response = await fetch(`https://beeka-backend.onrender.com/folders/${folderId}`, {
         method: "DELETE",
       });
 
@@ -578,7 +543,7 @@ export default function DashboardLayout() {
 
   const handleRenameSpace = async (spaceId: string, newName: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/spaces/${spaceId}`, {
+      const response = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newName }),
@@ -607,7 +572,7 @@ export default function DashboardLayout() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/spaces/${spaceId}`, {
+      const response = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}`, {
         method: "DELETE",
       });
 
@@ -628,14 +593,14 @@ export default function DashboardLayout() {
     }
   };
 
-  const updateSpaceName = async (spaceId: string, content: string) => {
+  const updateSpaceName = async (spaceId: string) => {
     if (!selectedSpace) return;
 
-    const newName = generateSpaceName(selectedSpace.type, content);
+    const newName = generateSpaceName(selectedSpace.type);
     if (newName === selectedSpace.name) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/spaces/${spaceId}`, {
+      const response = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -914,7 +879,7 @@ export default function DashboardLayout() {
             <button
               onClick={() => {
                 if (selectedFolder && selectedFolder.resources.length > 0) {
-                  setShowFilesList(true);
+                  setShowFolderSidebar(false);
                 }
               }}
               className="w-full py-2 px-4 bg-[#2A2D3E] hover:bg-[#353849] rounded-lg flex items-center gap-2"
@@ -1033,7 +998,7 @@ export default function DashboardLayout() {
                 setPdfText={setPdfText}
                 resources={selectedFolder?.resources || []}
                 onSendMessage={handleSendMessage}
-                onMessageSent={(content) => updateSpaceName(selectedSpace.id, content)}
+                onMessageSent={() => updateSpaceName(selectedSpace.id)}
               />
             )}
             {selectedSpace.type === 'notes' && (
@@ -1041,9 +1006,9 @@ export default function DashboardLayout() {
                 resources={selectedFolder?.resources || []}
                 onGenerate={handleGenerateNotes}
                 initialNotes={selectedSpace.notes}
-                onNotesGenerated={(content) => {
+                onNotesGenerated={() => {
                   if (selectedSpace) {
-                    updateSpaceName(selectedSpace.id, content);
+                    updateSpaceName(selectedSpace.id);
                   }
                 }}
                 spaceId={selectedSpace.id}
@@ -1054,17 +1019,13 @@ export default function DashboardLayout() {
                 resources={selectedFolder?.resources || []}
                 onGenerate={handleGenerateQuiz}
                 initialQuiz={selectedSpace.notes}
-                onQuizGenerated={(content) => updateSpaceName(selectedSpace.id, content)}
-                spaceId={selectedSpace.id}
+                onQuizGenerated={() => updateSpaceName(selectedSpace.id)}
               />
             )}
             {selectedSpace.type === 'flashcards' && (
               <FlashcardGenerator
                 resources={selectedFolder?.resources || []}
                 onGenerate={handleGenerateFlashcards}
-                initialFlashcards={selectedSpace.notes}
-                onFlashcardsGenerated={(content) => updateSpaceName(selectedSpace.id, content)}
-                spaceId={selectedSpace.id}
               />
             )}
             {selectedSpace.type === 'solve' && (
@@ -1077,7 +1038,6 @@ export default function DashboardLayout() {
         ) : selectedFolder ? (
           <div className="p-8">
             <ResourceManager
-              folderId={selectedFolder.id}
               resources={selectedFolder?.resources || []}
             />
           </div>
@@ -1138,7 +1098,7 @@ export default function DashboardLayout() {
               >
                 <MessageSquare size={28} className="text-blue-400" />
                 <h4 className="text-lg font-semibold">Chat with AI</h4>
-                <p className="text-gray-400 text-sm">Get instant answers and explanations from your AI study buddy</p>
+                <p className="text-gray-400 text-sm">Get instant answers and explanations from your AI Beeka AI</p>
               </button>
 
               <button
@@ -1266,7 +1226,7 @@ export default function DashboardLayout() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-[#12141F] rounded-xl p-8 max-w-6xl w-full text-white">
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-2xl font-bold">Subscribe to Study Buddy AI!</h3>
+              <h3 className="text-2xl font-bold">Subscribe to Beeka AI AI!</h3>
               <button onClick={() => setShowUpgradeModal(false)} className="hover:bg-[#2A2D3E] p-2 rounded-lg transition-colors">
                 <X size={24} />
               </button>

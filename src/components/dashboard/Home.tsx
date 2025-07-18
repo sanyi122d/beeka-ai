@@ -8,7 +8,6 @@ interface HomeProps {
 }
 
 export default function Home({ onCreateFolder, onCreateSpace, folders }: HomeProps) {
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [showFolderSelector , setShowFolderSelector] = useState(false);
   const [selectedSpaceType, setSelectedSpaceType] = useState<'chat' | 'notes' | 'quiz' | 'flashcards' | 'solve' | null>(null);
   
@@ -17,7 +16,6 @@ export default function Home({ onCreateFolder, onCreateSpace, folders }: HomePro
     if (container) {
       const scrollAmount = direction === 'left' ? -300 : 300;
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      setScrollPosition(container.scrollLeft + scrollAmount);
     }
   };
 
@@ -26,7 +24,7 @@ export default function Home({ onCreateFolder, onCreateSpace, folders }: HomePro
     setShowFolderSelector(true);
   };
 
-  const handleFolderSelect = (folderId: string) => {
+  const handleFolderSelect = () => {
     if (selectedSpaceType) {
       onCreateSpace(selectedSpaceType);
       setShowFolderSelector(false);
@@ -47,7 +45,7 @@ export default function Home({ onCreateFolder, onCreateSpace, folders }: HomePro
               <MessageSquare className="text-blue-400" />
               Chat with AI
             </div>
-            <p className="text-gray-400">Get instant help and explanations from your AI study buddy</p>
+            <p className="text-gray-400">Get instant help and explanations from your AI Beeka AI</p>
           </button>
         </div>
 
@@ -204,7 +202,7 @@ export default function Home({ onCreateFolder, onCreateSpace, folders }: HomePro
               {folders.map(folder => (
                 <button
                   key={folder.id}
-                  onClick={() => handleFolderSelect(folder.id)}
+                  onClick={() => handleFolderSelect()}
                   className="w-full p-4 bg-[#2A2D3E] hover:bg-[#353849] rounded-lg text-left transition-colors"
                 >
                   <div className="flex items-center gap-3">

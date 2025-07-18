@@ -134,7 +134,7 @@ export default function AIChat({
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/spaces/${spaceId}/messages`);
+        const response = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}/messages`);
         if (response.ok) {
           const data = await response.json();
           setMessages(data);
@@ -150,7 +150,7 @@ export default function AIChat({
     try {
       const fileContents = await Promise.all(
         selectedIds.map(async (fileId) => {
-          const response = await fetch(`http://localhost:8000/file-content/${fileId}`);
+          const response = await fetch(`https://beeka-backend.onrender.com/file-content/${fileId}`);
           if (!response.ok) {
             throw new Error(`Failed to fetch content for file ID: ${fileId}`);
           }
@@ -170,7 +170,7 @@ export default function AIChat({
         content: `Selected files for context: ${fileNames}`
       };
 
-      const response = await fetch(`http://localhost:8000/spaces/${spaceId}/messages`, {
+      const response = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(systemMessage)
@@ -189,7 +189,7 @@ export default function AIChat({
         content: 'Failed to load file contents. Please try again.'
       };
 
-      const response = await fetch(`http://localhost:8000/spaces/${spaceId}/messages`, {
+      const response = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(errorMessage)
@@ -215,7 +215,7 @@ export default function AIChat({
 
     try {
       // Save user message
-      const userResponse = await fetch(`http://localhost:8000/spaces/${spaceId}/messages`, {
+      const userResponse = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userMessage)
@@ -244,7 +244,7 @@ export default function AIChat({
         content: aiResponse,
         timestamp: new Date().toISOString()
       };
-      const aiResponse2 = await fetch(`http://localhost:8000/spaces/${spaceId}/messages`, {
+      const aiResponse2 = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(aiMessage)
@@ -278,7 +278,7 @@ export default function AIChat({
         content: errorMessage,
         timestamp: new Date().toISOString()
       };
-      const errorResponse2 = await fetch(`http://localhost:8000/spaces/${spaceId}/messages`, {
+      const errorResponse2 = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(errorResponse)

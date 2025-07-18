@@ -57,7 +57,7 @@ export default function NotesGenerator({ resources, onGenerate, initialNotes, on
     useEffect(() => {
         const loadSpaceNotes = async () => {
             try {
-                const response = await fetch(`http://localhost:8000/spaces/${spaceId}`);
+                const response = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}`);
                 if (response.ok) {
                     const spaceData = await response.json();
                     if (spaceData.notes) {
@@ -127,7 +127,7 @@ export default function NotesGenerator({ resources, onGenerate, initialNotes, on
 
             // Update the space with the new notes
             try {
-                const response = await fetch(`http://localhost:8000/spaces/${spaceId}`, {
+                const response = await fetch(`https://beeka-backend.onrender.com/spaces/${spaceId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -163,7 +163,7 @@ export default function NotesGenerator({ resources, onGenerate, initialNotes, on
         setCurrentMessage("");
 
         try {
-            const response = await fetch('http://localhost:8000/chat', {
+            const response = await fetch('https://beeka-backend.onrender.com/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

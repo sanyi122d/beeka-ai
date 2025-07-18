@@ -5,7 +5,6 @@ export default function PDFViewer({ folderId, onFileUpload }: { folderId: string
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
-  const [totalProgress, setTotalProgress] = useState(0);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -15,7 +14,6 @@ export default function PDFViewer({ folderId, onFileUpload }: { folderId: string
     setIsLoading(true);
     setError(null);
     setUploadProgress({});
-    setTotalProgress(0);
 
     try {
       const uploadPromises = files.map(async (file) => {
@@ -31,7 +29,7 @@ export default function PDFViewer({ folderId, onFileUpload }: { folderId: string
         formData.append("file", file);
 
         // Upload the file
-        const uploadRes = await fetch(`http://localhost:8000/upload/${folderId}`, {
+        const uploadRes = await fetch(`https://beeka-backend.onrender.com/upload/${folderId}`, {
           method: "POST",
           body: formData,
         });
@@ -50,7 +48,7 @@ export default function PDFViewer({ folderId, onFileUpload }: { folderId: string
         }));
         
         // Validate the file
-        const validateRes = await fetch(`http://localhost:8000/validate-file/${uploadData.id}`);
+        const validateRes = await fetch(`https://beeka-backend.onrender.com/validate-file/${uploadData.id}`);
         if (!validateRes.ok || !(await validateRes.json()).valid) {
           throw new Error(`Failed to validate ${file.name}`);
         }
@@ -62,7 +60,6 @@ export default function PDFViewer({ folderId, onFileUpload }: { folderId: string
 
       // Upload all files concurrently
       await Promise.all(uploadPromises);
-      setTotalProgress(100);
     } catch (err) {
       console.error("Upload error:", err);
       setError(err instanceof Error ? err.message : "File processing failed");

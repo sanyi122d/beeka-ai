@@ -17,7 +17,7 @@
 
 You're about to initialize a Firebase project in this directory:
 
-  /Users/mac/Documents/Sanyi Project/Study Buddy/study-buddy
+  /Users/mac/Documents/Sanyi Project/Beeka AI/study-buddy
 
 [debug] [2025-05-31T22:58:18.371Z] ExitPromptError: User force closed the prompt with SIGINT
     at Interface.sigint (/Users/mac/.nvm/versions/node/v16.14.0/lib/node_modules/firebase-tools/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)

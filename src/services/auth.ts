@@ -1,6 +1,6 @@
 import { AuthResponse, LoginRequest, SignupRequest } from '../types/auth';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'https://beeka-backend.onrender.com';
 
 export const authService = {
   async login(request: LoginRequest): Promise<AuthResponse> {

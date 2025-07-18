@@ -2,10 +2,8 @@ import { BookOpen, MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 
 export default function ResourceManager({
-    folderId,
     resources
 }: {
-    folderId: string;
     resources: Array<{ id: string; name: string }>;
 }) {
     const [hoveredResource, setHoveredResource] = useState<string | null>(null);

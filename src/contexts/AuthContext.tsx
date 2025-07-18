@@ -2,12 +2,10 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../config/firebase";
 import {
   onAuthStateChanged,
-  signInWithEmailLink,
   sendSignInLinkToEmail,
   GoogleAuthProvider,
   signInWithPopup,
   signOut as firebaseSignOut,
-  User
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 

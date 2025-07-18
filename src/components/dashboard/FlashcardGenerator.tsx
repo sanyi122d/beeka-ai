@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, RotateCcw, Shuffle, X, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw, X, Loader2 } from 'lucide-react';
 
 interface Resource {
   id: string;
@@ -15,25 +15,11 @@ interface Flashcard {
 interface FlashcardGeneratorProps {
   resources: Resource[];
   onGenerate: (fileIds: string[], options: { num_flashcards: number }) => Promise<string>;
-  initialFlashcards?: string;
-  onFlashcardsGenerated?: (content: string) => void;
-  spaceId: string;
-}
-
-interface Message {
-  id?: string;
-  space_id: string;
-  role: 'user' | 'ai' | 'system';
-  content: string;
-  timestamp: string;
 }
 
 const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   resources,
   onGenerate,
-  initialFlashcards,
-  onFlashcardsGenerated,
-  spaceId,
 }) => {
   const [showModal, setShowModal] = useState(true);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
@@ -41,11 +27,9 @@ const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isShuffled, setIsShuffled] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [numFlashcards, setNumFlashcards] = useState(5);
   const [generationStep, setGenerationStep] = useState<'idle' | 'reading' | 'generating' | 'complete'>('idle');
-  const [messages, setMessages] = useState<Message[]>([]);
 
   const handleGenerate = async () => {
     if (selectedFiles.length === 0) {
@@ -63,9 +47,6 @@ const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
       setFlashcards(parsedFlashcards);
       setCurrentIndex(0);
       setIsFlipped(false);
-      if (onFlashcardsGenerated) {
-        onFlashcardsGenerated(content);
-      }
       setGenerationStep('complete');
       setShowModal(false);
     } catch (error) {
@@ -117,18 +98,9 @@ const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     }
   };
 
-  const handleShuffle = () => {
-    const shuffled = [...flashcards].sort(() => Math.random() - 0.5);
-    setFlashcards(shuffled);
-    setCurrentIndex(0);
-    setIsFlipped(false);
-    setIsShuffled(true);
-  };
-
   const handleReset = () => {
     setCurrentIndex(0);
     setIsFlipped(false);
-    setIsShuffled(false);
   };
 
   const toggleFileSelection = (fileId: string) => {
@@ -137,49 +109,6 @@ const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         ? prev.filter(id => id !== fileId)
         : [...prev, fileId]
     );
-  };
-
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim() || !flashcards.length) return;
-
-    const userMessage = {
-      space_id: spaceId,
-      role: 'user' as const,
-      content: message,
-      timestamp: new Date().toISOString()
-    };
-    setMessages(prev => [...prev, userMessage]);
-
-    try {
-      const response = await fetch('http://localhost:8000/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          context: flashcards.map(card => `${card.front}\n${card.back}`).join('\n\n')
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to get response');
-
-      const data = await response.json();
-      const aiMessage = {
-        space_id: spaceId,
-        role: 'ai' as const,
-        content: data.response,
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage = {
-        space_id: spaceId,
-        role: 'ai' as const,
-        content: 'Sorry, I encountered an error processing your message.',
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    }
   };
 
   return (
@@ -320,12 +249,6 @@ const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                     className="p-2 rounded-full bg-[#1A1D2E] hover:bg-[#2A2D3E] transition-colors disabled:opacity-50"
                   >
                     <ChevronLeft size={24} />
-                  </button>
-                  <button
-                    onClick={handleShuffle}
-                    className="p-2 rounded-full bg-[#1A1D2E] hover:bg-[#2A2D3E] transition-colors"
-                  >
-                    <Shuffle size={24} />
                   </button>
                   <button
                     onClick={handleReset}

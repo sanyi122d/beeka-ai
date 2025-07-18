@@ -11,7 +11,7 @@ const sources = ['Google Search', 'Friend', 'LinkedIn', 'YouTube', 'Other'];
     <div className="w-full max-w-md space-y-8">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-white mb-2">How did you hear about us?</h2>
-        <p className="text-gray-400">Select where you discovered Study Buddy</p>
+        <p className="text-gray-400">Select where you discovered Beeka AI</p>
       </div>
       <div className="space-y-4">
         {sources.map((source) => (
@@ -109,7 +109,7 @@ const WelcomeVideo = ({ onComplete }: { onComplete: () => void }) => {
   return (
     <div className="w-full max-w-4xl space-y-8">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-white mb-2">Welcome to Study Buddy!</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">Welcome to Beeka AI!</h2>
         <p className="text-gray-400">Watch this quick guide to get started</p>
       </div>
       <div className="aspect-video bg-[#1a1625] rounded-lg overflow-hidden">
@@ -136,9 +136,6 @@ const WelcomeVideo = ({ onComplete }: { onComplete: () => void }) => {
 const CompleteProfile: React.FC = () => {
   const { user, setUser } = useAuth();
   const [step, setStep] = useState(0);
-  const [source, setSource] = useState<string | null>(null);
-  const [education, setEducation] = useState<string | null>(null);
-  const [studyGoals, setStudyGoals] = useState<string[]>([]);
   const navigate = useNavigate();
 
   const handleComplete = async () => {
@@ -152,9 +149,9 @@ const CompleteProfile: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0814] to-[#1a1625] p-4">
-      {step === 0 && <SourceInfo onSubmit={(src) => { setSource(src); setStep(1); }} />}
-      {step === 1 && <EducationLevel onSubmit={(lvl) => { setEducation(lvl); setStep(2); }} />}
-      {step === 2 && <StudyGoals onSubmit={(goals) => { setStudyGoals(goals); setStep(3); }} />}
+      {step === 0 && <SourceInfo onSubmit={() => { setStep(1); }} />}
+      {step === 1 && <EducationLevel onSubmit={() => { setStep(2); }} />}
+      {step === 2 && <StudyGoals onSubmit={() => { setStep(3); }} />}
       {step === 3 && <WelcomeVideo onComplete={handleComplete} />}
     </div>
   );
