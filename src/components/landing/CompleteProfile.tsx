@@ -105,7 +105,7 @@ const StudyGoals = ({ onSubmit }: { onSubmit: (goals: string[]) => void }) => {
 
 // Step 4: Welcome Video
 const WelcomeVideo = ({ onComplete }: { onComplete: () => void }) => {
-  const youtubeVideoId = 'FMU0j_ly4kk';
+  const youtubeVideoId = 'y2lGQKo-aFo';
   return (
     <div className="w-full max-w-4xl space-y-8">
       <div className="text-center mb-8">
@@ -113,7 +113,14 @@ const WelcomeVideo = ({ onComplete }: { onComplete: () => void }) => {
         <p className="text-gray-400">Watch this quick guide to get started</p>
       </div>
       <div className="aspect-video bg-[#1a1625] rounded-lg overflow-hidden">
-       
+         <iframe
+      className="w-full h-full"
+      src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&controls=1&modestbranding=1&rel=0`}
+      title="Welcome Video"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowFullScreen
+  ></iframe>
       </div>
       <button
         onClick={onComplete}
